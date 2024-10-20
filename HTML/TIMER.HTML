@@ -1,0 +1,348 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Timer</title>
+    <!-- Bootstrap CSS -->
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Metropolis:wght@400;700&display=swap');
+        body {
+            font-family: 'Metropolis', sans-serif;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            background-image: url('CCISSC-INFOTECH24-TIMER.png');
+            height: 100vh;
+            margin: 0;
+            background-color: #f0f0f0;
+            background-size: cover;
+            background-position: center;
+            background-repeat: no-repeat;
+        }
+        .container {
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            width: 100%;
+            max-width: 1000px;
+            padding: 20px;
+        }
+        .timer-container {
+            text-align: center;
+            margin-bottom: 20px;
+        }
+        .timer {
+            font-size: 170px;
+            font-weight: bold;
+            color: white;
+            margin-bottom: 20px;
+        }
+        .controls {
+            display: flex;
+            justify-content: center;
+            gap: 10px;
+            margin-bottom: 20px;
+        }
+        .contestant-input-container {
+            display: flex;
+            justify-content: center;
+            gap: 10px;
+            margin-bottom: 20px;
+            width: 50%;
+        }
+        .contestant-input input {
+            flex-grow: 1;
+            min-width: 200px;
+        }
+        .contestants-container {
+            width: 100%;
+            max-width: 500px;
+            display: flex;
+            flex-direction: column;
+            align-items: flex-start;
+            padding: 20px;
+            background-color: rgba(255, 255, 255, 0.8);
+            border: 1px solid #ccc;
+            border-radius: 5px;
+            height: 300px;
+            overflow-y: auto;
+            z-index: 1;
+            position: static;
+            transition: opacity 0.3s;
+            display: none;
+        }
+        .contestants-list {
+            width: 100%;
+            border-collapse: collapse;
+        }
+        .contestants-list thead {
+            background-color: #f0f0f0;
+        }
+        .contestants-list th, .contestants-list td {
+            padding: 10px;
+            border: 1px solid #ddd;
+            text-align: left;
+        }
+        .contestants-list th {
+            font-weight: bold;
+        }
+        /* Sidebar styles */
+        .burger-btn {
+            position: fixed;
+            top: 15px;
+            left: 15px;
+            z-index: 2;
+            cursor: pointer;
+        }
+        .burger-btn div {
+            width: 30px;
+            height: 3px;
+            background-color: #fff;
+            margin: 5px 0;
+            transition: 0.4s;
+        }
+        .sidebar {
+            height: 100%;
+            width: 250px;
+            position: fixed;
+            top: 0;
+            left: -250px;
+            background-color: rgba(0, 0, 0, 0.8);
+            overflow-x: hidden;
+            transition: 0.5s;
+            padding-top: 60px;
+            z-index: 1;
+        }
+        .sidebar a {
+            padding: 8px 8px 8px 32px;
+            text-decoration: none;
+            font-size: 25px;
+            color: #fff;
+            display: block;
+            transition: 0.3s;
+        }
+        .sidebar a:hover {
+            color: #f1f1f1;
+        }
+        .open-sidebar {
+            left: 0;
+        }
+        .close-btn {
+            position: absolute;
+            top: 15px;
+            right: 25px;
+            font-size: 36px;
+            margin-left: 50px;
+        }
+        #switchToStopwatch {
+            font-size: 20px;
+            color: #fff;
+            padding: 10px 32px;
+            text-align: center;
+            text-decoration: none;
+            display: block;
+            margin: 15px 0;
+        }
+        #switchToStopwatch:hover {
+            color: #f1f1f1;
+        }
+        @keyframes slide-in {
+            from {
+                transform: translateY(-20px);
+                opacity: 0;
+            }
+            to {
+                transform: translateY(0);
+                opacity: 1;
+            }
+        }
+        .result-row {
+            animation: slide-in 0.5s ease forwards;
+        }
+        #hoursInput, #minutesInput, #secondsInput {
+            width: 70px;
+        }
+    </style>
+</head>
+<body>
+
+<!-- Burger Button -->
+<div class="burger-btn" id="burgerBtn">
+    <div></div>
+    <div></div>
+    <div></div>
+</div>
+
+<!-- Sidebar -->
+<div class="sidebar" id="sidebar">
+    <a href="#" class="close-btn" id="closeBtn">&times;</a>
+    <a id="switchToStopwatch" href="STOPWATCH.html">Switch to Stopwatch Mode</a>
+</div>
+
+<div class="container">
+    <div class="timer-container">
+        <div class="timer" id="timer">00:00:00</div>
+        <div class="controls">
+            <input type="number" id="hoursInput" placeholder="Hrs" class="form-control" style="display:inline-block;">
+            <input type="number" id="minutesInput" placeholder="Min" class="form-control" style="display:inline-block;">
+            <input type="number" id="secondsInput" placeholder="Sec" class="form-control" style="display:inline-block;">
+            <button id="start" class="btn btn-success">Start</button>
+            <button id="pause" class="btn btn-warning">Pause</button>
+            <button id="stop" class="btn btn-primary">Record Result</button>
+        </div>
+    </div>
+
+    <div class="contestant-input-container">
+        <input type="text" id="contestantNumber" placeholder="Enter Contestant Name" class="form-control">
+    </div>
+    <button id="toggleResults" class="btn btn-info">Show Results</button>
+
+    <div class="contestants-container" id="contestantsPanel">
+        <h3>Results</h3>
+        <table class="contestants-list">
+            <thead>
+                <tr>
+                    <th>Contestant Name</th>
+                    <th>Time Finished</th>
+                </tr>
+            </thead>
+            <tbody id="contestantsList">
+                <!-- Contestant results will appear here -->
+            </tbody>
+        </table>
+    </div>
+</div>
+
+<!-- Audio element for timer finished sound -->
+<audio id="timerSound" src="timer-sound.mp3" preload="auto"></audio>
+
+<script>
+let timerTimer;
+let countdownTime = 0; // Time in seconds
+let isRunning = false;
+
+const timerDisplay = document.getElementById('timer');
+const startButton = document.getElementById('start');
+const pauseButton = document.getElementById('pause');
+const stopButton = document.getElementById('stop');
+const contestantNumberInput = document.getElementById('contestantNumber');
+const contestantsList = document.getElementById('contestantsList');
+const hoursInput = document.getElementById('hoursInput');
+const minutesInput = document.getElementById('minutesInput');
+const secondsInput = document.getElementById('secondsInput');
+const contestantsPanel = document.getElementById('contestantsPanel');
+const toggleResultsButton = document.getElementById('toggleResults');
+const timerSound = document.getElementById('timerSound');
+
+const burgerBtn = document.getElementById('burgerBtn');
+const sidebar = document.getElementById('sidebar');
+const closeBtn = document.getElementById('closeBtn');
+
+burgerBtn.addEventListener('click', () => {
+    sidebar.classList.toggle('open-sidebar');
+});
+
+closeBtn.addEventListener('click', () => {
+    sidebar.classList.remove('open-sidebar');
+});
+
+function resetTimerDisplay() {
+    timerDisplay.textContent = '00:00:00';
+    countdownTime = 0;
+    clearInterval(timerTimer);
+    isRunning = false;
+    pauseButton.textContent = 'Pause';
+    startButton.disabled = false;
+}
+
+function startTimer() {
+    if (!isRunning) {
+        isRunning = true;
+        const hours = parseInt(hoursInput.value) || 0;
+        const minutes = parseInt(minutesInput.value) || 0;
+        const seconds = parseInt(secondsInput.value) || 0;
+
+        // If countdownTime is already set, continue from there, otherwise set it
+        if (countdownTime === 0) {
+            countdownTime = hours * 3600 + minutes * 60 + seconds;
+        }
+        timerDisplay.textContent = formatTime(countdownTime);
+        startButton.disabled = true;
+
+        timerTimer = setInterval(() => {
+            if (countdownTime <= 0) {
+                clearInterval(timerTimer);
+                isRunning = false;
+                timerSound.play();
+                resetTimerDisplay();
+            } else {
+                countdownTime--;
+                timerDisplay.textContent = formatTime(countdownTime);
+            }
+        }, 1000);
+    }
+}
+
+function formatTime(seconds) {
+    const hrs = String(Math.floor(seconds / 3600)).padStart(2, '0');
+    const mins = String(Math.floor((seconds % 3600) / 60)).padStart(2, '0');
+    const secs = String(seconds % 60).padStart(2, '0');
+    return `${hrs}:${mins}:${secs}`;
+}
+
+startButton.addEventListener('click', startTimer);
+
+pauseButton.addEventListener('click', () => {
+    if (isRunning) {
+        clearInterval(timerTimer);
+        isRunning = false;
+        pauseButton.textContent = 'Resume';
+    } else {
+        startTimer();
+        pauseButton.textContent = 'Pause';
+    }
+});
+
+stopButton.addEventListener('click', () => {
+    const contestantName = contestantNumberInput.value.trim();
+    if (contestantName && countdownTime > 0) {
+        const timeFinished = formatTime(countdownTime);
+        const newRow = document.createElement('tr');
+        newRow.classList.add('result-row');
+        newRow.innerHTML = `<td>${contestantName}</td><td>${timeFinished}</td>`;
+        contestantsList.appendChild(newRow);
+        contestantNumberInput.value = '';
+        // Do not reset the timer display or countdown time here
+    }
+});
+
+toggleResultsButton.addEventListener('click', () => {
+    contestantsPanel.style.display = contestantsPanel.style.display === 'none' ? 'flex' : 'none';
+});
+
+// Add keyboard controls
+document.addEventListener('keydown', (event) => {
+    switch (event.key) {
+        case ' ': // Spacebar
+            event.preventDefault(); // Prevent scrolling
+            startTimer();
+            break;
+        case 'Escape': // Escape key
+            pauseButton.click();
+            break;
+        case 'Enter': // Enter key
+            stopButton.click();
+            break;
+        case 'Tab': // Tab key
+            event.preventDefault(); // Prevent focus change
+            toggleResultsButton.click();
+            break;
+    }
+});
+
+</script>
+</body>
+</html>

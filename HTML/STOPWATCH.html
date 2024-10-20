@@ -1,0 +1,369 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>STOPWATCH</title>
+    <!-- Bootstrap CSS -->
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+    <style>
+        /* Import Metropolis Font */
+        @import url('https://fonts.googleapis.com/css2?family=Metropolis:wght@400;700&display=swap');
+
+        body {
+            font-family: 'Metropolis', sans-serif;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            background-image: url('CCISSC-INFOTECH24-TIMER.png');
+            height: 100vh;
+            margin: 0;
+            background-color: #f0f0f0;
+            background-size: cover;
+            background-position: center;
+            background-repeat: no-repeat;
+        }
+
+        .container {
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            width: 100%;
+            max-width: 1000px;
+            padding: 20px;
+        }
+
+        .timer-container {
+            text-align: center;
+            margin-bottom: 20px;
+        }
+
+        .timer {
+            font-size: 170px;
+            font-weight: bold;
+            color: white;
+            margin-bottom: 20px;
+            animation: none;
+        }
+
+        .controls {
+            display: flex;
+            justify-content: center;
+            gap: 10px;
+            margin-bottom: 20px;
+        }
+
+        .contestant-input-container {
+            display: flex;
+            justify-content: center;
+            gap: 10px;
+            margin-bottom: 20px;
+            width: 50%;
+        }
+
+        .contestant-input input {
+            flex-grow: 1;
+            min-width: 200px;
+            animation: none;
+        }
+
+        .contestants-container {
+            width: 100%;
+            max-width: 500px;
+            display: flex;
+            flex-direction: column;
+            align-items: flex-start;
+            padding: 20px;
+            background-color: rgba(255, 255, 255, 0.8);
+            border: 1px solid #ccc;
+            border-radius: 5px;
+            height: 300px;
+            overflow-y: auto;
+            z-index: 1;
+            position: static;
+            transition: opacity 0.3s;
+            display: none;
+        }
+
+        .contestants-list {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        .contestants-list thead {
+            background-color: #f0f0f0;
+        }
+
+        .contestants-list th, .contestants-list td {
+            padding: 10px;
+            border: 1px solid #ddd;
+            text-align: left;
+        }
+
+        .contestants-list th {
+            font-weight: bold;
+        }
+
+        /* Sidebar styles */
+        .burger-btn {
+            position: fixed;
+            top: 15px;
+            left: 15px;
+            z-index: 2;
+            cursor: pointer;
+        }
+
+        .burger-btn div {
+            width: 30px;
+            height: 3px;
+            background-color: #fff;
+            margin: 5px 0;
+            transition: 0.4s;
+        }
+
+        .sidebar {
+            height: 100%;
+            width: 250px;
+            position: fixed;
+            top: 0;
+            left: -250px;
+            background-color: rgba(0, 0, 0, 0.8);
+            overflow-x: hidden;
+            transition: 0.5s;
+            padding-top: 60px;
+            z-index: 1;
+        }
+
+        .sidebar a {
+            padding: 8px 8px 8px 32px;
+            text-decoration: none;
+            font-size: 25px;
+            color: #fff;
+            display: block;
+            transition: 0.3s;
+        }
+
+        .sidebar a:hover {
+            color: #f1f1f1;
+        }
+
+        .open-sidebar {
+            left: 0;
+        }
+
+        .close-btn {
+            position: absolute;
+            top: 15px;
+            right: 25px;
+            font-size: 36px;
+            margin-left: 50px;
+        }
+
+        /* Animation for the timer */
+        @keyframes pulse {
+            0% {
+                transform: scale(1);
+                opacity: 1;
+            }
+            50% {
+                transform: scale(1.05);
+                opacity: 0.8;
+            }
+            100% {
+                transform: scale(1);
+                opacity: 1;
+            }
+        }
+
+        /* Animation for new result entry */
+        @keyframes slide-in {
+            from {
+                transform: translateY(-20px);
+                opacity: 0;
+            }
+            to {
+                transform: translateY(0);
+                opacity: 1;
+            }
+        }
+
+        .result-row {
+            animation: slide-in 0.5s ease forwards;
+        }
+
+        /* Style for clickable text */
+        .switch-mode {
+            padding: 16px 32px;
+            font-size: 20px;
+            color: white;
+            text-align: center;
+            cursor: pointer;
+            transition: background-color 0.3s;
+        }
+
+        .switch-mode:hover {
+            background-color: rgba(255, 255, 255, 0.2);
+        }
+    </style>
+</head>
+<body>
+
+<!-- Burger Button -->
+<div class="burger-btn" id="burgerBtn">
+    <div></div>
+    <div></div>
+    <div></div>
+</div>
+
+<!-- Sidebar -->
+<div class="sidebar" id="sidebar">
+    <a href="#" class="close-btn" id="closeBtn">&times;</a>
+    <div class="switch-mode" onclick="location.href='TIMER.HTML'">Switch to Timer Mode</div>
+</div>
+
+<div class="container">
+    <div class="timer-container">
+        <div class="timer" id="timer">00:00:00</div>
+        <div class="controls">
+            <button id="start" class="btn btn-success">Start</button>
+            <button id="pause" class="btn btn-warning">Pause</button>
+            <button id="stop" class="btn btn-primary">Record Result</button>
+        </div>
+    </div>
+
+    <div class="contestant-input-container">
+        <input type="text" id="contestantNumber" placeholder="Enter Contestant Name" class="form-control">
+    </div>
+    <button id="toggleResults" class="btn btn-info">Show Results</button>
+
+    <div class="contestants-container" id="contestantsPanel">
+        <h3>Results</h3>
+        <table class="contestants-list">
+            <thead>
+                <tr>
+                    <th>Contestant Name</th>
+                    <th>Time Finished</th>
+                </tr>
+            </thead>
+            <tbody id="contestantsList">
+                <!-- Contestant results will appear here -->
+            </tbody>
+        </table>
+    </div>
+</div>
+
+<script>
+    let stopwatchTimer;
+    let elapsedTime = 0;
+    let isRunning = false;
+
+    const timerDisplay = document.getElementById('timer');
+    const startButton = document.getElementById('start');
+    const pauseButton = document.getElementById('pause');
+    const stopButton = document.getElementById('stop');
+    const contestantNumberInput = document.getElementById('contestantNumber');
+    const contestantsList = document.getElementById('contestantsList');
+    const contestantsPanel = document.getElementById('contestantsPanel');
+    const toggleResultsButton = document.getElementById('toggleResults');
+
+    // Sidebar functionality
+    const burgerBtn = document.getElementById('burgerBtn');
+    const sidebar = document.getElementById('sidebar');
+    const closeBtn = document.getElementById('closeBtn');
+
+    burgerBtn.addEventListener('click', () => {
+        sidebar.classList.toggle('open-sidebar');
+    });
+
+    closeBtn.addEventListener('click', () => {
+        sidebar.classList.remove('open-sidebar');
+    });
+
+    function resetStopwatch() {
+        timerDisplay.textContent = '00:00:00'; // Reset the timer display
+        elapsedTime = 0; // Reset elapsed time
+        clearInterval(stopwatchTimer); // Clear stopwatch timer
+        isRunning = false; // Reset running state
+    }
+
+    function startStopwatch() {
+        if (!isRunning) {
+            isRunning = true;
+            const startTime = Date.now() - elapsedTime;
+            timerDisplay.style.animation = 'pulse 1s infinite';
+            stopwatchTimer = setInterval(() => {
+                elapsedTime = Date.now() - startTime;
+                timerDisplay.textContent = formatTime(elapsedTime);
+            }, 100);
+        }
+    }
+
+    function pauseStopwatch() {
+        isRunning = false;
+        clearInterval(stopwatchTimer);
+        timerDisplay.style.animation = 'none';
+    }
+
+    function recordResult() {
+        const timeFinished = formatTime(elapsedTime);
+        const contestantNumber = contestantNumberInput.value || "Unknown";
+
+        if (contestantNumber) {
+            const listItem = document.createElement('tr');
+            listItem.classList.add('result-row');
+            listItem.innerHTML = `<td>${contestantNumber}</td><td>${timeFinished}</td>`;
+            contestantsList.appendChild(listItem);
+        }
+
+        contestantNumberInput.value = ''; // Clear the input field
+    }
+
+    function formatTime(ms) {
+        const totalSeconds = Math.max(Math.floor(ms / 1000), 0);
+        const hours = Math.floor(totalSeconds / 3600);
+        const minutes = Math.floor((totalSeconds % 3600) / 60);
+        const seconds = totalSeconds % 60;
+        return `${String(hours).padStart(2, '0')}:${String(minutes).padStart(2, '0')}:${String(seconds).padStart(2, '0')}`;
+    }
+
+    startButton.addEventListener('click', startStopwatch);
+    pauseButton.addEventListener('click', pauseStopwatch);
+    stopButton.addEventListener('click', recordResult); // Remove display panel opening here
+
+    toggleResultsButton.addEventListener('click', function() {
+        if (contestantsPanel.style.display === 'none' || contestantsPanel.style.display === '') {
+            contestantsPanel.style.display = 'block';
+            toggleResultsButton.textContent = 'Hide Results';
+        } else {
+            contestantsPanel.style.display = 'none';
+            toggleResultsButton.textContent = 'Show Results';
+        }
+    });
+
+    contestantNumberInput.addEventListener('keydown', function(event) {
+        if (event.key === 'Enter') {
+            recordResult();
+            // Commented out to prevent auto-opening
+            // contestantsPanel.style.display = 'block'; 
+        }
+    });
+
+    document.addEventListener('keydown', function(event) {
+        if (event.code === 'Tab') {
+            event.preventDefault(); // Prevent default tab behavior
+            contestantsPanel.style.display = contestantsPanel.style.display === 'none' || contestantsPanel.style.display === '' ? 'block' : 'none';
+            toggleResultsButton.textContent = contestantsPanel.style.display === 'block' ? 'Hide Results' : 'Show Results';
+        }
+        else if (event.code === 'Space') {
+            event.preventDefault();
+            startButton.click(); // Start the stopwatch when space bar is pressed
+        }
+        else if (event.code === 'Escape') {
+            pauseStopwatch(); // Pause or resume the stopwatch when the escape key is pressed
+        }
+    });
+</script>
+
+</body>
+</html>
